@@ -11,9 +11,10 @@ Please choose one of these options:
 3) Find a game by name [Opens Sub-Menu]
 4) Compare Games (Best/Worst Attributes for a Game) [Opens Sub-Menu]
 5) Change rating for a game
-6) Delete game
-7) Wipe Database
-8) Exit.
+6) Delete game by ID
+7) Delete games by name
+8) Wipe Database
+9) Exit.
 
 
 Your Selection: """
@@ -22,10 +23,8 @@ SUB_MENU_FIND_GAME_PROMPT = """
 -- Find Game --
 1) by Name
 2) by System
-3) by Publisher
 4) by Developer
 5) by Year Released
-6) by Genre
 7) by Price Range
 
 
@@ -46,9 +45,10 @@ def menu():
     connection = database.connect()
     database.create_tables(connection)
 
-    while (user_input := input(MENU_PROMPT)) != "8":
+    while (user_input := input(MENU_PROMPT)) != "9":
         if user_input == "1":
             prompt_add_new_game(connection)
+            prompt_see_all_games(connection)
 
         elif user_input == "2":
             prompt_see_all_games(connection)
@@ -61,6 +61,15 @@ def menu():
 
         elif user_input == "6":
             prompt_delete_game_byID(connection)
+            prompt_see_all_games(connection)
+
+        elif user_input == "7":
+            prompt_delete_games_byNAME(connection)
+            prompt_see_all_games(connection)
+
+        elif user_input == "8":
+            prompt_wipe_db(connection)
+
         else:
             print("\ninvalid input please try again")
 
@@ -73,11 +82,27 @@ def prompt_delete_game_byID(connection):
     id = input("Enter game ID (row ID) to delete: ")
     games = database.delete_game_byID(connection, id)
 
-def prompt_delete_game_byNAME(connection):
+def prompt_delete_games_byNAME(connection):
     name = input("Enter game name to delete all instances: ")
+    games = database.get_games_by_name(connection, name)
+    for game in games:
+        games = database.delete_games_byNAME(connection, name)
 
-    games = database.delete_game_byNAME(connection, name)
-    for name in games:
+def prompt_wipe_db(connection):
+    try:
+        answer = str(input("Are you sure you want to wipe your database? (y/n): ")).lower()
+        if answer == 'y':
+            games = database.wipe_db(connection)
+        if answer == 'n':
+            print("\nOkay. Your database will not be deleted.")
+            pass
+        else:
+            raise TypeError
+    except TypeError:
+        print("not a valid response!")
+        prompt_wipe_db(connection)
+
+
 def prompt_find_best_system(connection):
     name = input("Enter game name to find the best system for: ")
     best_system = database.get_best_system_for_game(connection, name)
