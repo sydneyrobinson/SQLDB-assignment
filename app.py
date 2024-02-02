@@ -57,22 +57,33 @@ def menu():
             prompt_find_game(connection)
 
         elif user_input == "4":
-            prompt_find_best_method(connection)
+            prompt_find_best_system(connection)
 
+        elif user_input == "6":
+            prompt_delete_game_byID(connection)
         else:
             print("\ninvalid input please try again")
 
 
-def sub_menu_find_game():
+def sub_menu_find_game(connection):
     pass
 
 
+def prompt_delete_game_byID(connection):
+    id = input("Enter game ID (row ID) to delete: ")
+    games = database.delete_game_byID(connection, id)
 
+def prompt_delete_game_byNAME(connection):
+    name = input("Enter game name to delete all instances: ")
 
-def prompt_find_best_method(connection):
-    name = input("Enter game name to find: ")
-    best_method = database.get_best_preparation_for_game(connection, name)
-    print(f"The best preparation method for {name} is: {best_method[2]}")  # column number 2
+    games = database.delete_game_byNAME(connection, name)
+    for name in games:
+def prompt_find_best_system(connection):
+    name = input("Enter game name to find the best system for: ")
+    best_system = database.get_best_system_for_game(connection, name)
+    print(f"The best system for {name} is: {best_system[2]}")  # column number 2
+    if name not in best_system("data.db"):
+        print("no game exists with that name!")
     # error here when typed in game name that does not exist
 
 
@@ -81,18 +92,22 @@ def prompt_find_game(connection):
     games = database.get_games_by_name(connection, name)
     for game in games:
         print(f"{game[1]} ({game[2]}) - {game[3]}/100")
+    if name not in games:
+        print("no game exists with that name!")
 
 
 def prompt_see_all_games(connection):
     games = database.get_all_games(connection)
+    print("--->Game DB")
     for game in games:
         print(f"{game[1]} ({game[2]}) - {game[3]}/100")
+    print("-->")
 
 
 def prompt_add_new_game(connection):
     name = input("Enter game name: ")
-    method = input("Enter how you've prepared it: ")
-    rating = int(input("Enter your rating score (0-100): "))
+    method = input("Enter a system that it is on : ")
+    rating = int(input("Enter your rating score (for that particular system!) (0-100): "))
     database.add_game(connection, name, method, rating)
 
 

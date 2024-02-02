@@ -20,7 +20,15 @@ GET_BEST_SYSTEM_FOR_GAME = """
 SELECT * FROM games
 WHERE name = ?
 ORDER BY rating DESC LIMIT 1;"""
+DELETE_GAME_BYID = "DELETE from games WHERE id = ?;"
+DELETE_GAME_BYNAME = "DELETE from games WHERE name = ?;"
 
+def delete_game_byID(connection,id): #https://www.geeksforgeeks.org/how-to-delete-a-specific-row-from-sqlite-table-using-python/
+    with connection:
+        connection.execute(DELETE_GAME_BYID, (id,))
+def delete_games_byNAME(connection,name):
+    with connection:
+        connection.execute(DELETE_GAME_BYNAME, (name,))
 
 def connect():
     return sqlite3.connect("data.db")
