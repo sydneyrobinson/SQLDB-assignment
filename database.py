@@ -10,9 +10,9 @@ SELECT system, AVG(rating) FROM games GROUP BY system;
 import sqlite3
 
 #queries
-CREATE_GAMES_TABLE = "CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY, name TEXT, system TEXT, rating INTEGER);"
+CREATE_GAMES_TABLE = "CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY, name TEXT, system TEXT, year INTEGER, rating INTEGER);"
 
-INSERT_GAME =  "INSERT INTO games (name,system,rating) VALUES (?,?,?);"
+INSERT_GAME =  "INSERT INTO games (name,system, year, rating) VALUES (?,?,?,?);"
 
 GET_ALL_GAMES = "SELECT * FROM games;"
 GET_GAMES_BY_NAME = "SELECT * FROM games WHERE name = ?;"
@@ -20,16 +20,18 @@ GET_BEST_SYSTEM_FOR_GAME = """
 SELECT * FROM games
 WHERE name = ?
 ORDER BY rating DESC LIMIT 1;"""
-DELETE_GAME_BYID = "DELETE from games WHERE id = ?;"
-DELETE_GAME_BYNAME = "DELETE from games WHERE name = ?;"
+GET_GAMES_BY_RATING_RANGE = "SELECT rating FROM games WHERE rating BETWEEN ? AND ?;"
+DELETE_GAME_BY_ID = "DELETE from games WHERE id = ?;"
+DELETE_GAME_BY_NAME = "DELETE from games WHERE name = ?;"
 WIPE_DB = "DELETE FROM games;"
+
 
 def delete_game_byID(connection,id): #https://www.geeksforgeeks.org/how-to-delete-a-specific-row-from-sqlite-table-using-python/
     with connection:
-        connection.execute(DELETE_GAME_BYID, (id,))
+        connection.execute(DELETE_GAME_BY_ID, (id,))
 def delete_games_byNAME(connection,name):
     with connection:
-        connection.execute(DELETE_GAME_BYNAME, (name,))
+        connection.execute(DELETE_GAME_BY_NAME, (name,))
 def wipe_db(connection):
     with connection:
         connection.execute(WIPE_DB)
@@ -42,10 +44,13 @@ def create_tables(connection):
         connection.execute(CREATE_GAMES_TABLE)
 
 
-def add_game(connection, name, system, rating):
+def add_game(connection, name, system, year, rating):
     with connection:
-        connection.execute(INSERT_GAME, (name, system, rating))
+        connection.execute(INSERT_GAME, (name, system, year, rating))
 
+def get_games_by_rating_range(connection, min, max):
+    with connection:
+        connection.execute(GET_GAMES_BY_RATING_RANGE, (min, max)).fetchall()
 
 def get_all_games(connection):
     with connection:

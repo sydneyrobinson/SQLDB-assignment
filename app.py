@@ -8,13 +8,14 @@ Please choose one of these options:
 
 1) Add a new game
 2) See all games
-3) Find a game by name [Opens Sub-Menu]
+3) Find a game by...[Opens Sub-Menu]
 4) Compare Games (Best/Worst Attributes for a Game) [Opens Sub-Menu]
 5) Change rating for a game
 6) Delete game by ID
 7) Delete games by name
 8) Wipe Database
-9) Exit.
+9) Find game by rating range
+10) Exit.
 
 
 Your Selection: """
@@ -22,10 +23,7 @@ Your Selection: """
 SUB_MENU_FIND_GAME_PROMPT = """
 -- Find Game --
 1) by Name
-2) by System
-4) by Developer
-5) by Year Released
-7) by Price Range
+2) by Price Range
 
 
 Your Selection: 
@@ -35,17 +33,23 @@ SUB_MENU_COMPARE_GAMES_PROMPT = """
 -- Compare Games (Best/Worst Attributes for a Game) --
 1) See which system is best for a game
 2) Sort games from lowest to highest price
-3) Sort games from newest to oldest
 
 
 Your Selection:
+"""
+
+SUB_MENU_DELETE_PROMPT = """
+-- Delete Rows --
+1) Delete game by ID
+2) Delete games by name
+3) Wipe Database
 """
 
 def menu():
     connection = database.connect()
     database.create_tables(connection)
 
-    while (user_input := input(MENU_PROMPT)) != "9":
+    while (user_input := input(MENU_PROMPT)) != "10":
         if user_input == "1":
             prompt_add_new_game(connection)
             prompt_see_all_games(connection)
@@ -54,7 +58,7 @@ def menu():
             prompt_see_all_games(connection)
 
         elif user_input == "3":
-            prompt_find_game(connection)
+            prompt_find_game_by_name(connection)
 
         elif user_input == "4":
             prompt_find_best_system(connection)
@@ -70,12 +74,22 @@ def menu():
         elif user_input == "8":
             prompt_wipe_db(connection)
 
+        elif user_input == "9":
+            prompt_find_games_by_rating_range(connection)
+
         else:
             print("\ninvalid input please try again")
 
 
 def sub_menu_find_game(connection):
-    pass
+    while (user_input := input(MENU_PROMPT)) != "9":
+        if user_input == "1":
+            prompt_add_new_game(connection)
+            prompt_see_all_games(connection)
+
+        else:
+            print("\ninvalid input please try again")
+
 
 
 def prompt_delete_game_byID(connection):
@@ -93,7 +107,8 @@ def prompt_wipe_db(connection):
         answer = str(input("Are you sure you want to wipe your database? (y/n): ")).lower()
         if answer == 'y':
             games = database.wipe_db(connection)
-        if answer == 'n':
+            prompt_see_all_games(connection)
+        elif answer == 'n':
             print("\nOkay. Your database will not be deleted.")
             pass
         else:
@@ -102,6 +117,20 @@ def prompt_wipe_db(connection):
         print("not a valid response!")
         prompt_wipe_db(connection)
 
+def prompt_find_games_by_rating_range(connection):
+    try:
+        min = int(input("Please enter your minimum rating value: "))
+        max = int(input("Please enter your maximum rating value: "))
+        if min >= 0 and max <= 100:
+            games = database.get_games_by_rating_range(connection, min, max)
+            for game in games:
+                print(f"{game[1]} ({game[2]}) {game[3]} - {game[4]}/100")
+
+        else:
+            raise ValueError
+    except ValueError:
+        print("That is not an acceptable value! Please only type an integer between 0-100.")
+        prompt_find_games_by_rating_range(connection)
 
 def prompt_find_best_system(connection):
     name = input("Enter game name to find the best system for: ")
@@ -112,11 +141,11 @@ def prompt_find_best_system(connection):
     # error here when typed in game name that does not exist
 
 
-def prompt_find_game(connection):
+def prompt_find_game_by_name(connection):
     name = input("Enter game name to find: ")
     games = database.get_games_by_name(connection, name)
     for game in games:
-        print(f"{game[1]} ({game[2]}) - {game[3]}/100")
+        print(f"{game[1]} ({game[2]}) {game[3]} - {game[4]}/100")
     if name not in games:
         print("no game exists with that name!")
 
@@ -125,15 +154,19 @@ def prompt_see_all_games(connection):
     games = database.get_all_games(connection)
     print("--->Game DB")
     for game in games:
-        print(f"{game[1]} ({game[2]}) - {game[3]}/100")
+        print(f"{game[1]} ({game[2]}) {game[3]} - {game[4]}/100")
     print("-->")
 
 
 def prompt_add_new_game(connection):
-    name = input("Enter game name: ")
-    method = input("Enter a system that it is on : ")
-    rating = int(input("Enter your rating score (for that particular system!) (0-100): "))
-    database.add_game(connection, name, method, rating)
+    try:
+        name = input("Enter game name: ")
+        method = input("Enter a system that it is on: ")
+        year = int(input("Enter when it came out on that system: "))
+        rating = int(input("Enter your rating score (for that particular system!) (0-100): "))
+        database.add_game(connection, name, method, year, rating)
+    except ValueError:
+        print("Invalid input! please type an integer :)")
 
 
 menu()
