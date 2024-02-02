@@ -123,13 +123,14 @@ def prompt_find_games_by_rating_range(connection):
         max = int(input("Please enter your maximum rating value: "))
         if min >= 0 and max <= 100:
             games = database.get_games_by_rating_range(connection, min, max)
+            print("\nGames in your range:")
             for game in games:
                 print(f"{game[1]} ({game[2]}) {game[3]} - {game[4]}/100")
 
         else:
             raise ValueError
     except ValueError:
-        print("That is not an acceptable value! Please only type an integer between 0-100.")
+        print("That is not an acceptable value! Please only type an integer between 0-100.\n")
         prompt_find_games_by_rating_range(connection)
 
 def prompt_find_best_system(connection):

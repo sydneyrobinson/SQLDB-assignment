@@ -20,7 +20,7 @@ GET_BEST_SYSTEM_FOR_GAME = """
 SELECT * FROM games
 WHERE name = ?
 ORDER BY rating DESC LIMIT 1;"""
-GET_GAMES_BY_RATING_RANGE = "SELECT rating FROM games WHERE rating BETWEEN ? AND ?;"
+GET_GAMES_BY_RATING_RANGE = "SELECT * FROM games WHERE rating BETWEEN ? AND ?;"
 DELETE_GAME_BY_ID = "DELETE from games WHERE id = ?;"
 DELETE_GAME_BY_NAME = "DELETE from games WHERE name = ?;"
 WIPE_DB = "DELETE FROM games;"
@@ -50,7 +50,7 @@ def add_game(connection, name, system, year, rating):
 
 def get_games_by_rating_range(connection, min, max):
     with connection:
-        connection.execute(GET_GAMES_BY_RATING_RANGE, (min, max)).fetchall()
+        return connection.execute(GET_GAMES_BY_RATING_RANGE, (min, max)).fetchall()
 
 def get_all_games(connection):
     with connection:
