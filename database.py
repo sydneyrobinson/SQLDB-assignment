@@ -24,7 +24,12 @@ GET_GAMES_BY_RATING_RANGE = "SELECT * FROM games WHERE rating BETWEEN ? AND ?;"
 DELETE_GAME_BY_ID = "DELETE from games WHERE id = ?;"
 DELETE_GAME_BY_NAME = "DELETE from games WHERE name = ?;"
 WIPE_DB = "DELETE FROM games;"
+GET_NEWEST_SYSTEM_GAMES = "SELECT * FROM games WHERE system = ? ORDER BY year DESC"
+UPDATE_RATING = "UPDATE games SET rating = ? WHERE id = ?"
 
+def update_rating(connection, rating, id):
+    with connection:
+        connection.execute(UPDATE_RATING, (rating, id,))
 
 def delete_game_byID(connection,id): #https://www.geeksforgeeks.org/how-to-delete-a-specific-row-from-sqlite-table-using-python/
     with connection:
@@ -61,6 +66,9 @@ def get_games_by_name(connection,name):
     with connection:
         return connection.execute(GET_GAMES_BY_NAME, (name,)).fetchall() #name has to be a tuple
 
+def get_newest_system_games(connection, system):
+    with connection:
+        return connection.execute(GET_NEWEST_SYSTEM_GAMES, (system,)).fetchall()
 
 def get_best_system_for_game(connection, name):
     with connection:
